@@ -1,0 +1,65 @@
+[package]
+name = "esp32_cam_microflow"
+version = "0.1.0"
+authors = ["artico"]
+edition = "2021"
+resolver = "2"
+rust-version = "1.77"
+
+[[bin]]
+name = "esp32_cam_microflow"
+harness = false # do not use the built in cargo test harness -> resolve rust-analyzer errors
+
+[profile.release]
+opt-level = "s"
+
+[profile.dev]
+debug = true    # Symbols are nice and they don't increase the size on Flash
+opt-level = "z"
+
+[features]
+default = ["use-inline-asm"]
+
+experimental = ["esp-idf-svc/experimental"]
+use-inline-asm = []
+
+[dependencies]
+log = "0.4"
+esp-idf-svc = "0.51"
+esp-idf-sys = "0.36.1"
+esp-idf-hal = "0.45.2"
+heapless = "0.9.1"
+microflow = {"git" = "https://github.com/Geostartico/microflow-rs.git", rev = "016558ab0ac69cc72d78ac34bd13386f96f3b1a0"}
+nalgebra = { version = "0.32", default-features = false, features = ["macros"] }
+embedded-sdmmc = "0.9.0"
+embedded-hal-bus = "0.2.0"
+embedded-hal = "1.0.0"
+ndarray = "0.16.1"
+ndarray-npy = "0.9.1"
+rand = { version = "0.9.2", default-features = false, features = ["small_rng"] }
+bytemuck = "1.24.0"
+#esp-hal = {version = "0.20.1", features = ["esp32"] }
+
+# --- Optional Embassy Integration ---
+# esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
+
+# If you enable embassy-time-driver, you MUST also add one of:
+
+# a) Standalone Embassy libs ( embassy-time, embassy-sync etc) with a foreign async runtime:
+# embassy-time = { version = "0.4.0", features = ["generic-queue-8"] } # NOTE: any generic-queue variant will work
+
+# b) With embassy-executor:
+# embassy-executor = { version = "0.7", features = ["executor-thread", "arch-std"] }
+
+# NOTE: if you use embassy-time with embassy-executor you don't need the generic-queue-8 feature
+
+# --- Temporary workaround for embassy-executor < 0.8 ---
+# esp-idf-svc = { version = "0.51", features = ["embassy-time-driver", "embassy-sync"] }
+# critical-section = { version = "1.1", features = ["std"], default-features = false }
+
+[build-dependencies]
+embuild = "0.33"
+[[package.metadata.esp-idf-sys.extra_components]]
+component_dirs = "components/esp32-camera"
+bindings_header = "components/bindings.h"
+bindings_module = "camera"
